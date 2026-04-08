@@ -1,0 +1,2 @@
+# Optional: experiment tracking (install after setuptools if build fails on Windows)
+mlflow==2.17.2

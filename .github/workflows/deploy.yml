@@ -1,0 +1,19 @@
+# Optional: push to Hugging Face Spaces when secrets are configured.
+# Set HF_TOKEN in repo secrets and replace USERNAME/SPACE below.
+name: Deploy Space
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Placeholder
+        run: |
+          echo "Configure git remote to Hugging Face and HF_TOKEN secret to enable deploy."
+          echo "Example: git remote add hf https://huggingface.co/spaces/USERNAME/credit-risk-scorer"
