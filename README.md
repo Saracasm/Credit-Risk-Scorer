@@ -48,7 +48,7 @@ graph TD
 - **Frontend (Presentation Layer):** A modern, highly interactive React Single Page Application built with Next.js and Tailwind CSS. It communicates exclusively via REST to the backend, rendering dynamic charts and a glassmorphic UI.
 - **Backend (API Layer):** A fast, async Python server (FastAPI). It loads the pre-trained XGBoost pipeline (`models/xgb_pipeline.pkl`) into memory and handles inference requests.
 - **ML Engine (Core Logic):** Processes raw inputs through standard scaling, one-hot encoding, and missing value imputation before passing them to the tuned XGBoost classifier. It also calculates local SHAP values to explain exactly *why* a decision was made.
-- **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq or Gemini), injecting the applicant's risk profile and SHAP values into a structured prompt to generate personalized, natural language financial advice.
+- **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq ), injecting the applicant's risk profile and SHAP values into a structured prompt to generate personalized, natural language financial advice.
 
 ## Dataset
 
