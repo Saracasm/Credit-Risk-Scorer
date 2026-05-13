@@ -13,7 +13,7 @@ End-to-end classical ML system: loan default probability (Give Me Some Credit), 
 
 ## Architecture
 
-The system is fully decoupled into three distinct layers:
+The system is fully decoupled and utilizes several key layers:
 
 ```mermaid
 graph TD
@@ -25,6 +25,11 @@ graph TD
     subgraph Backend ["Backend API (FastAPI)"]
         API[REST Endpoints]
         LLMProxy[LLM Manager]
+    end
+
+    subgraph Data ["Data Layer"]
+        SQLite[(SQLite DB)]
+        Chroma[(ChromaDB Vector Store)]
     end
 
     subgraph ML_System ["ML Engine (Python)"]
@@ -41,12 +46,15 @@ graph TD
     
     API <-->|Feature Vector| Model
     API <-->|Feature Importance| SHAP
+    API <-->|SQL| SQLite
+    API <-->|Embeddings| Chroma
     LLMProxy <-->|Prompt + Context| Groq
     API <-->|Route| LLMProxy
 ```
 
 - **Frontend (Presentation Layer):** A modern, highly interactive React Single Page Application built with Next.js and Tailwind CSS. It communicates exclusively via REST to the backend, rendering dynamic charts and a glassmorphic UI.
 - **Backend (API Layer):** A fast, async Python server (FastAPI). It loads the pre-trained XGBoost pipeline (`models/xgb_pipeline.pkl`) into memory and handles inference requests.
+- **Data Layer:** Uses SQLite to store structured prediction history and AI advisor conversation logs. It also utilizes an optional ChromaDB vector store to index applicant profiles, enabling semantic similarity search (finding past applicants with similar risk profiles).
 - **ML Engine (Core Logic):** Processes raw inputs through standard scaling, one-hot encoding, and missing value imputation before passing them to the tuned XGBoost classifier. It also calculates local SHAP values to explain exactly *why* a decision was made.
 - **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq ), injecting the applicant's risk profile and SHAP values into a structured prompt to generate personalized, natural language financial advice.
 
