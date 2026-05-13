@@ -8,8 +8,8 @@ End-to-end classical ML system: loan default probability (Give Me Some Credit), 
 - **ML:** scikit-learn, XGBoost, imbalanced-learn (SMOTE), Optuna  
 - **Explainability / fairness:** SHAP, Fairlearn  
 - **Tracking (optional):** MLflow (`requirements-mlflow.txt`)  
-- **App:** Streamlit and/or **Next.js** (`frontend/`) + **FastAPI** (`backend/`)  
-- **Deploy:** [Railway (two services)](docs/railway.md)
+- **App:** **Next.js** (`frontend/`) + **FastAPI** (`backend/`)  
+- **Deploy:** Localhost (or deploy backend and frontend independently)
 
 ## Dataset
 
@@ -46,11 +46,23 @@ Place **`cs-training.csv`** in `data/` (do not commit; it is gitignored).
    python src/fairness.py
    ```
 
-4. Launch the app:
+4. Launch the application:
 
-   ```bash
-   streamlit run app.py
+   The application uses a decoupled architecture (FastAPI backend + Next.js frontend).
+
+   **Terminal 1 (Backend):**
+   ```powershell
+   # Run the backend script (loads .env and starts uvicorn on port 8000)
+   .\start_backend.ps1
    ```
+
+   **Terminal 2 (Frontend):**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   Then open `http://localhost:3000` in your browser.
 
 5. Tests:
 
@@ -79,8 +91,9 @@ Place **`cs-training.csv`** in `data/` (do not commit; it is gitignored).
 - `src/evaluate.py` – ROC/PR/confusion/threshold + SHAP PNGs under `data/plots/`  
 - `src/fairness.py` – fairness CSV  
 - `src/monitor.py` – prediction log + drift helpers  
-- `src/inference.py` – single-row inference helpers (`load_pipeline`, `build_feature_row`, `predict_default`, `shap_values_row`) shared by `app.py` and the test suite  
-- `app.py` – Streamlit UI  
+- `src/inference.py` – single-row inference helpers
+- `backend/main.py` – FastAPI backend API
+- `frontend/` – Next.js React user interface  
 
 ## License / data
 
