@@ -11,6 +11,45 @@ End-to-end classical ML system: loan default probability (Give Me Some Credit), 
 - **App:** **Next.js** (`frontend/`) + **FastAPI** (`backend/`)  
 - **Deploy:** Localhost (or deploy backend and frontend independently)
 
+## Architecture
+
+The system is fully decoupled into three distinct layers:
+
+```mermaid
+graph TD
+    subgraph Frontend ["Frontend (Next.js & React)"]
+        UI[User Interface]
+        Chart[Recharts Data Viz]
+    end
+
+    subgraph Backend ["Backend API (FastAPI)"]
+        API[REST Endpoints]
+        LLMProxy[LLM Manager]
+    end
+
+    subgraph ML_System ["ML Engine (Python)"]
+        Model[(XGBoost Model)]
+        SHAP[SHAP Explainer]
+    end
+    
+    subgraph External ["External Services"]
+        Groq[Groq API]
+    end
+
+    UI <-->|HTTP JSON| API
+    Chart --- UI
+    
+    API <-->|Feature Vector| Model
+    API <-->|Feature Importance| SHAP
+    LLMProxy <-->|Prompt + Context| Groq
+    API <-->|Route| LLMProxy
+```
+
+- **Frontend (Presentation Layer):** A modern, highly interactive React Single Page Application built with Next.js and Tailwind CSS. It communicates exclusively via REST to the backend, rendering dynamic charts and a glassmorphic UI.
+- **Backend (API Layer):** A fast, async Python server (FastAPI). It loads the pre-trained XGBoost pipeline (`models/xgb_pipeline.pkl`) into memory and handles inference requests.
+- **ML Engine (Core Logic):** Processes raw inputs through standard scaling, one-hot encoding, and missing value imputation before passing them to the tuned XGBoost classifier. It also calculates local SHAP values to explain exactly *why* a decision was made.
+- **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq or Gemini), injecting the applicant's risk profile and SHAP values into a structured prompt to generate personalized, natural language financial advice.
+
 ## Dataset
 
 [Kaggle – Give Me Some Credit](https://www.kaggle.com/datasets/brycecf/give-me-some-credit-dataset)  
@@ -51,18 +90,27 @@ Place **`cs-training.csv`** in `data/` (do not commit; it is gitignored).
    The application uses a decoupled architecture (FastAPI backend + Next.js frontend).
 
    **Terminal 1 (Backend):**
+   Open a PowerShell terminal in the root project directory and run:
    ```powershell
-   # Run the backend script (loads .env and starts uvicorn on port 8000)
+   # First time only (if Windows blocks the script):
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   
+   # Start the backend server
    .\start_backend.ps1
    ```
+   This will start the API on `http://localhost:8000`.
 
    **Terminal 2 (Frontend):**
-   ```bash
+   Open a **new** PowerShell terminal tab, then run:
+   ```powershell
+   # First time only (if Windows blocks npm scripts):
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
    cd frontend
    npm install
    npm run dev
    ```
-   Then open `http://localhost:3000` in your browser.
+   Once it starts, open `http://localhost:3000` in your browser.
 
 5. Tests:
 

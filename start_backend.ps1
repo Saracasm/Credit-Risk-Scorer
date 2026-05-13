@@ -6,5 +6,9 @@ Get-Content ".env" | ForEach-Object {
         [System.Environment]::SetEnvironmentVariable($name, $value, 'Process')
     }
 }
-Write-Host "GEMINI_API_KEY loaded: $($env:GEMINI_API_KEY.Substring(0,6))..." -ForegroundColor Green
+if ($env:GROQ_API_KEY) {
+    Write-Host "GROQ_API_KEY loaded: $($env:GROQ_API_KEY.Substring(0,6))..." -ForegroundColor Green
+} else {
+    Write-Host "No GROQ_API_KEY found in .env" -ForegroundColor Yellow
+}
 & "d:\credit risk scorer\venv\Scripts\python.exe" -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
