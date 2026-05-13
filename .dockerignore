@@ -1,8 +1,0 @@
-venv/
-__pycache__/
-.git/
-.pytest_cache/
-.mlruns/
-mlruns/
-*.md
-.github/

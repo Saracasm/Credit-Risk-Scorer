@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Credit Advisor | Credit Risk Scorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#c5c5d5",
+                        "primary-fixed-dim": "#b9c3ff",
+                        "tertiary-fixed-dim": "#ffb964",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "secondary-container": "#5c3187",
+                        "surface-bright": "#383940",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#34343c",
+                        "tertiary-fixed": "#ffddb9",
+                        "on-primary-fixed-variant": "#1f3ba6",
+                        "surface-container": "#1e1f26",
+                        "primary-container": "#7189f6",
+                        "surface-dim": "#121319",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-error": "#690005",
+                        "background": "#121319",
+                        "surface-variant": "#34343c",
+                        "on-tertiary": "#472a00",
+                        "primary-fixed": "#dde1ff",
+                        "surface-container-high": "#292931",
+                        "secondary-fixed": "#f0dbff",
+                        "on-tertiary-container": "#3e2400",
+                        "on-primary": "#002388",
+                        "inverse-surface": "#e3e1eb",
+                        "tertiary-container": "#ca8012",
+                        "surface-container-low": "#1a1b22",
+                        "outline-variant": "#444653",
+                        "on-secondary-fixed": "#2c0051",
+                        "error": "#ffb4ab",
+                        "on-surface": "#e3e1eb",
+                        "on-secondary-fixed-variant": "#5c3187",
+                        "error-container": "#93000a",
+                        "inverse-on-surface": "#2f3037",
+                        "surface": "#121319",
+                        "on-tertiary-fixed-variant": "#663e00",
+                        "on-secondary": "#44176f",
+                        "on-primary-fixed": "#001356",
+                        "outline": "#8f909e",
+                        "on-secondary-container": "#d0a1ff",
+                        "on-primary-container": "#001e78",
+                        "on-background": "#e3e1eb",
+                        "surface-tint": "#b9c3ff",
+                        "surface-container-lowest": "#0d0e14",
+                        "inverse-primary": "#3c55bf",
+                        "secondary": "#dcb8ff",
+                        "primary": "#b9c3ff",
+                        "tertiary": "#ffb964"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "lg": "24px",
+                        "gutter": "20px",
+                        "xs": "4px",
+                        "xl": "40px",
+                        "container_max": "1440px",
+                        "sm": "8px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-main": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "data-point": ["JetBrains Mono"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-main": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-caps": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "data-point": ["14px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f0f23;
+            color: #e3e1eb;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .risk-gauge {
+            background: conic-gradient(from 0deg, #ca8012 0%, #ca8012 62%, transparent 62%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="font-body-main text-body-main selection:bg-primary-container/30">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container/30 backdrop-blur-md shadow-sm border-b border-white/10">
+<div class="flex justify-between items-center px-gutter h-16 w-full max-w-container_max mx-auto">
+<div class="font-display-lg text-headline-md tracking-tighter text-primary">CREDIT RISK SCORER</div>
+<nav class="hidden md:flex gap-lg items-end h-full">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2" href="#">Risk Scorer</a>
+<a class="text-primary border-b-2 border-primary font-bold pb-2" href="#">AI Advisor</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2" href="#">Scenarios</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2" href="#">Batch Scoring</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2" href="#">Report</a>
+</nav>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">settings</span>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-white/20">
+<img alt="Analyst Profile" class="h-full w-full object-cover" data-alt="A professional headshot of a financial analyst in a modern office environment. He is wearing a sharp, charcoal grey suit and a white dress shirt, looking confidently at the camera with a subtle, trustworthy smile. The lighting is crisp and cool-toned, echoing a premium fintech brand aesthetic with deep blacks and vibrant blue-purple highlights in the background bokeh. The overall mood is authoritative and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRx0H73M1xfJwnRqqxs3BHWKNnXLtiMR0ePc0xrdN8dhg8ckgtdWl-PGCsA-DclHNwf7zO7n5-gQhLcJ817JcA1Wet7XRIxNw2D3ayo5kAJEebOlShktD33x1HL6ZeV3kHRsgGcC0Qeh-JxOvMqo4Js7gMR9TGH_0TY2Kf48LlEBg8xZBMFYz-_NUasU12RnPrSoSq6UIHJgKz-xaT57J0Q3WLWDqv5mCsLF_7Fja1SYnPGxm6h1RcXdfHPmrPsEcwkMcPLl3T"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Right) -->
+<aside class="fixed right-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low/40 backdrop-blur-xl border-l border-white/5 flex flex-col py-md gap-sm z-40">
+<div class="px-md mb-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-widest opacity-60">OPERATIONS</div>
+<div class="font-display-lg text-primary text-xl">Institutional Grade</div>
+</div>
+<div class="flex flex-col gap-xs flex-grow">
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-3 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/20 transition-all duration-300">
+<span class="material-symbols-outlined">bolt</span>
+<span class="font-label-caps text-label-caps">Quick Actions</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-3 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/20 transition-all duration-300">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">Risk Parameters</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-3 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/20 transition-all duration-300">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">Data Sources</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-3 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/20 transition-all duration-300">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-caps text-label-caps">Model Config</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface px-4 py-3 flex items-center gap-sm cursor-pointer hover:bg-surface-bright/20 transition-all duration-300">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-caps text-label-caps">Export</span>
+</div>
+</div>
+<div class="px-md mt-auto">
+<button class="w-full primary-gradient text-white font-bold py-md rounded-xl active:scale-95 transition-transform">
+                New Analysis
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-gutter pb-lg flex gap-lg min-h-screen mr-64">
+<!-- LEFT PANEL: Applicant Summary -->
+<section class="w-[30%] flex flex-col gap-md">
+<div class="glass-card rounded-xl p-lg sticky top-24">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-lg">CURRENT APPLICANT</h3>
+<!-- Risk Gauge -->
+<div class="flex flex-col items-center mb-xl">
+<div class="relative w-40 h-40 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-[10px] border-white/5"></div>
+<div class="absolute inset-0 rounded-full border-[10px] risk-gauge opacity-80" style="clip-path: circle(50% at 50% 50%);"></div>
+<div class="flex flex-col items-center z-10">
+<span class="text-display-lg font-data-point text-tertiary">62%</span>
+<span class="text-label-caps text-on-surface-variant">RISK SCORE</span>
+</div>
+</div>
+<div class="mt-md bg-tertiary/10 text-tertiary border border-tertiary/20 px-4 py-1 rounded-full font-label-caps text-label-caps">
+                        MEDIUM RISK
+                    </div>
+</div>
+<!-- Key Stats Grid -->
+<div class="grid grid-cols-1 gap-md mb-xl">
+<div class="flex justify-between items-center py-sm border-b border-white/5">
+<span class="text-on-surface-variant font-label-caps text-label-caps">AGE</span>
+<span class="font-data-point text-on-surface">38 Years</span>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-white/5">
+<span class="text-on-surface-variant font-label-caps text-label-caps">MONTHLY INCOME</span>
+<span class="font-data-point text-on-surface">$2,800.00</span>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-white/5">
+<span class="text-on-surface-variant font-label-caps text-label-caps">DEBT RATIO</span>
+<span class="font-data-point text-on-surface text-tertiary">0.85</span>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="flex flex-col gap-sm">
+<button class="w-full text-left glass-card border-none hover:bg-white/5 px-md py-sm rounded-lg flex items-center gap-sm transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">info</span>
+<span class="text-sm font-label-caps">Why this score?</span>
+<span class="material-symbols-outlined ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+<button class="w-full text-left glass-card border-none hover:bg-white/5 px-md py-sm rounded-lg flex items-center gap-sm transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">trending_up</span>
+<span class="text-sm font-label-caps">How to improve?</span>
+<span class="material-symbols-outlined ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+<button class="w-full text-left glass-card border-none hover:bg-white/5 px-md py-sm rounded-lg flex items-center gap-sm transition-all group">
+<span class="material-symbols-outlined text-sm text-primary">verified</span>
+<span class="text-sm font-label-caps">Loan recommendation</span>
+<span class="material-symbols-outlined ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- CENTER PANEL: Chat Interface -->
+<section class="flex-grow flex flex-col glass-card rounded-xl overflow-hidden relative">
+<!-- Chat Header -->
+<header class="p-md border-b border-white/10 flex items-center justify-between bg-surface-container-highest/20">
+<div class="flex items-center gap-md">
+<div class="h-10 w-10 primary-gradient rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white">smart_toy</span>
+</div>
+<div>
+<div class="font-bold text-on-surface flex items-center gap-sm">
+                            Credit Advisor
+                            <div class="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+</div>
+<div class="text-xs text-on-surface-variant font-label-caps">AGENT ONLINE</div>
+</div>
+</div>
+<!-- Tier Tabs -->
+<div class="flex bg-surface-container-lowest p-1 rounded-lg border border-white/5">
+<button class="px-md py-1 text-xs font-bold rounded bg-surface-bright text-primary shadow-sm">Free Tier (Gemini Flash)</button>
+<button class="px-md py-1 text-xs font-label-caps text-on-surface-variant hover:text-on-surface transition-colors">Pro Tier (BYOK)</button>
+</div>
+</header>
+<!-- Chat Content -->
+<div class="flex-grow overflow-y-auto p-lg flex flex-col gap-lg">
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="max-w-[80%] bg-secondary-container/40 text-on-secondary-container px-lg py-md rounded-2xl rounded-tr-none border border-secondary-container/30">
+<p>Why was this applicant flagged as medium risk?</p>
+</div>
+</div>
+<!-- AI Message -->
+<div class="flex gap-md">
+<div class="h-8 w-8 primary-gradient rounded-full flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-white">smart_toy</span>
+</div>
+<div class="max-w-[80%] flex flex-col gap-md">
+<div class="glass-card bg-surface-container-high/40 p-lg rounded-2xl rounded-tl-none">
+<p class="leading-relaxed">The primary driver is their <strong class="text-tertiary">debt-to-income ratio of 0.85</strong>, meaning 85% of monthly income goes to debt payments. SHAP analysis shows this single factor contributed <span class="text-tertiary">+0.32</span> to the default probability.</p>
+<p class="mt-md leading-relaxed">Additionally, their credit utilization of 92% signals financial distress. If they could reduce their debt ratio to 0.40, the risk would drop from 62% to approximately 35%.</p>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="max-w-[80%] bg-secondary-container/40 text-on-secondary-container px-lg py-md rounded-2xl rounded-tr-none border border-secondary-container/30">
+<p>What if they increased income by $2000?</p>
+</div>
+</div>
+<!-- AI Message with Comparison Card -->
+<div class="flex gap-md">
+<div class="h-8 w-8 primary-gradient rounded-full flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-white">smart_toy</span>
+</div>
+<div class="max-w-[80%] flex flex-col gap-md">
+<div class="glass-card bg-surface-container-high/40 p-lg rounded-2xl rounded-tl-none">
+<div class="bg-surface-container-lowest/50 border border-white/10 rounded-xl p-md mb-md flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-label-caps">SIMULATION RESULT</span>
+<div class="flex items-center gap-sm font-data-point text-lg">
+<span class="text-on-surface-variant line-through opacity-50">62%</span>
+<span class="material-symbols-outlined text-green-500">arrow_forward</span>
+<span class="text-green-400 font-bold">41%</span>
+</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-on-surface-variant font-label-caps">RISK DROP</div>
+<div class="text-green-400 font-bold">-21pts</div>
+</div>
+</div>
+<p class="leading-relaxed">Increasing the monthly income by $2000 significantly buffers the debt-to-income ratio from 0.85 to 0.51, moving the applicant into a much safer percentile for their demographic.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<footer class="p-md bg-surface-container-lowest/50 border-t border-white/5">
+<div class="glass-card border-none bg-surface-container p-sm flex items-center gap-md rounded-2xl">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<input class="flex-grow bg-transparent border-none focus:ring-0 text-on-surface font-body-main placeholder:text-on-surface-variant/40" placeholder="Ask about risk factors, scenarios, or policy..." type="text"/>
+<button class="primary-gradient h-10 w-10 flex items-center justify-center rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-white">send</span>
+</button>
+</div>
+</footer>
+</section>
+<!-- RIGHT PANEL: Improvement Plan -->
+<section class="w-[25%] flex flex-col gap-md">
+<div class="glass-card rounded-xl p-lg sticky top-24">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-lg">SCORE IMPROVEMENT PLAN</h3>
+<p class="text-sm mb-lg text-on-surface-variant leading-tight">Top actions suggested by the AI model to minimize default probability for this specific profile.</p>
+<div class="flex flex-col gap-md mb-lg">
+<!-- Action 1 -->
+<div class="glass-card border-none bg-white/5 p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-xs font-bold text-on-surface leading-tight w-2/3">Reduce credit utilization to 50%</span>
+<span class="text-green-400 font-data-point text-xs">-18%</span>
+</div>
+<div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+<div class="bg-green-500/50 h-full w-[40%] rounded-full"></div>
+</div>
+</div>
+<!-- Action 2 -->
+<div class="glass-card border-none bg-white/5 p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-xs font-bold text-on-surface leading-tight w-2/3">Pay off $10k in revolving debt</span>
+<span class="text-green-400 font-data-point text-xs">-12%</span>
+</div>
+<div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+<div class="bg-green-500/50 h-full w-[25%] rounded-full"></div>
+</div>
+</div>
+<!-- Action 3 -->
+<div class="glass-card border-none bg-white/5 p-md rounded-xl">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-xs font-bold text-on-surface leading-tight w-2/3">Clear late payment history</span>
+<span class="text-green-400 font-data-point text-xs">-8%</span>
+</div>
+<div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+<div class="bg-green-500/50 h-full w-[10%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Plan Footer -->
+<div class="pt-lg border-t border-white/10">
+<div class="flex justify-between items-end">
+<div>
+<span class="text-[10px] text-on-surface-variant font-label-caps block">POTENTIAL SCORE</span>
+<div class="flex items-center gap-xs">
+<span class="text-xl font-data-point text-on-surface-variant line-through opacity-50">62%</span>
+<span class="material-symbols-outlined text-green-500 text-sm">trending_down</span>
+<span class="text-3xl font-display-lg text-green-400">24%</span>
+</div>
+</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full border border-green-500/30 bg-green-500/5">
+<span class="material-symbols-outlined text-green-500">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Tip Card -->
+<div class="glass-card rounded-xl p-md bg-primary-container/10 border-primary-container/20">
+<div class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-md">lightbulb</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+<span class="text-primary font-bold">Analyst Tip:</span> High-limit credit cards with zero balance could further reduce utilization score by 3-5 points within 45 days.
+                    </p>
+</div>
+</div>
+</section>
+</main>
+</body></html>

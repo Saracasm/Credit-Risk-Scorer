@@ -1,0 +1,358 @@
+/* ===== ANTIGRAVITY — Stitch Design System: Deep Credit Intelligence ===== */
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap');
+
+/* ===== STITCH DESIGN TOKENS ===== */
+:root {
+    --surface: #121319;
+    --surface-dim: #121319;
+    --surface-container-lowest: #0d0e14;
+    --surface-container-low: #1a1b22;
+    --surface-container: #1e1f26;
+    --surface-container-high: #292931;
+    --surface-container-highest: #34343c;
+    --surface-bright: #383940;
+    --surface-variant: #34343c;
+    --on-surface: #e3e1eb;
+    --on-surface-variant: #c5c5d5;
+    --outline: #8f909e;
+    --outline-variant: #444653;
+    --primary: #b9c3ff;
+    --primary-container: #7189f6;
+    --inverse-primary: #3c55bf;
+    --secondary: #dcb8ff;
+    --secondary-container: #5c3187;
+    --tertiary: #ffb964;
+    --error: #ffb4ab;
+    --bg-glass: rgba(255, 255, 255, 0.03);
+    --bg-glass-hover: rgba(255, 255, 255, 0.06);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --border-glass-top: rgba(255, 255, 255, 0.15);
+    --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ===== GLOBAL ===== */
+html, body, .stApp, [data-testid="stAppViewContainer"] {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--on-surface) !important;
+    background-color: var(--surface) !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    font-family: 'Hanken Grotesk', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: white !important;
+}
+
+div[data-testid="stMetric"] [data-testid="stMetricValue"],
+.stDataFrame, code, pre {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+/* ===== AMBIENT BACKGROUND GLOW (matching Stitch blur blobs) ===== */
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: -10%; left: -10%;
+    width: 40%; height: 40%;
+    background: rgba(185, 195, 255, 0.05);
+    filter: blur(120px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.stApp::after {
+    content: '';
+    position: fixed;
+    bottom: -10%; right: -10%;
+    width: 40%; height: 40%;
+    background: rgba(92, 49, 135, 0.1);
+    filter: blur(120px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== SIDEBAR ===== */
+section[data-testid="stSidebar"] {
+    background: var(--surface-container-lowest) !important;
+    border-right: 1px solid var(--border-glass) !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span {
+    color: var(--on-surface) !important;
+}
+
+/* ===== GLASS CARDS (Metric widgets) ===== */
+div[data-testid="stMetric"] {
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-top: 1px solid var(--border-glass-top) !important;
+    border-left: 1px solid var(--border-glass-top) !important;
+    border-radius: 4px !important;
+    padding: 20px 24px !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-testid="stMetric"]:hover {
+    background: var(--bg-glass-hover) !important;
+    border-color: rgba(185, 195, 255, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+div[data-testid="stMetric"] label {
+    color: var(--on-surface-variant) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: white !important;
+    font-weight: 500 !important;
+    font-size: 1.5rem !important;
+}
+
+/* ===== TABS (Stitch-style nav) ===== */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0px !important;
+    background: var(--surface-container) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: 4px !important;
+    padding: 4px !important;
+    border: 1px solid var(--border-glass) !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 2px !important;
+    padding: 10px 20px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: var(--on-surface-variant) !important;
+    transition: all 0.2s ease !important;
+    border-bottom: 2px solid transparent !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--on-surface) !important;
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid var(--primary) !important;
+    background: transparent !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {
+    display: none !important;
+}
+
+/* ===== BUTTONS ===== */
+.stButton > button {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid var(--border-glass) !important;
+}
+
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="stBaseButton-primary"] {
+    background: var(--gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.25) !important;
+}
+
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    filter: brightness(1.1) !important;
+    transform: scale(0.98) !important;
+}
+
+.stButton > button:not([kind="primary"]) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+}
+
+.stButton > button:not([kind="primary"]):hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===== EXPANDERS (Glass panels) ===== */
+details[data-testid="stExpander"] {
+    background: var(--bg-glass) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+details[data-testid="stExpander"]:hover {
+    border-color: rgba(185, 195, 255, 0.2) !important;
+}
+
+/* ===== TEXT INPUTS ===== */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+    color: var(--on-surface) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    transition: border-color 0.2s !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+/* ===== SLIDERS ===== */
+.stSlider [data-baseweb="slider"] [role="slider"] {
+    background: var(--primary-container) !important;
+    border-color: var(--primary-container) !important;
+}
+
+/* ===== SELECTBOX ===== */
+[data-baseweb="select"] > div {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== DATAFRAMES ===== */
+.stDataFrame {
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+}
+
+/* ===== CHAT MESSAGES ===== */
+.stChatMessage {
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-top: 1px solid var(--border-glass-top) !important;
+    border-left: 1px solid var(--border-glass-top) !important;
+    border-radius: 4px !important;
+    transition: border-color 0.2s !important;
+}
+
+.stChatMessage:hover {
+    border-color: rgba(185, 195, 255, 0.2) !important;
+}
+
+[data-testid="stChatInput"] > div {
+    background: var(--bg-glass) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== ALERTS ===== */
+.stAlert {
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== PROGRESS BAR ===== */
+.stProgress > div > div > div {
+    background: var(--gradient) !important;
+    border-radius: 999px !important;
+}
+
+.stProgress > div > div {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 999px !important;
+}
+
+/* ===== DOWNLOAD BUTTONS ===== */
+.stDownloadButton > button {
+    background: var(--surface-container-highest) !important;
+    border: none !important;
+    color: var(--primary) !important;
+    border-radius: 4px !important;
+}
+
+.stDownloadButton > button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===== FILE UPLOADER ===== */
+[data-testid="stFileUploader"] section {
+    background: var(--bg-glass) !important;
+    border: 1px dashed var(--outline-variant) !important;
+    border-radius: 4px !important;
+}
+
+[data-testid="stFileUploader"] section:hover {
+    border-color: var(--primary) !important;
+}
+
+/* ===== DIVIDERS ===== */
+hr {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--outline); }
+
+/* ===== TOOLTIP ICON ===== */
+[data-testid="stTooltipIcon"] {
+    color: var(--primary) !important;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+[data-testid="stTooltipIcon"]:hover { opacity: 1; }
+
+/* ===== RADIO (Tier selector) ===== */
+.stRadio > div > label {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 4px !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s !important;
+}
+
+.stRadio > div > label:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===== SUBTLE ENTRANCE ANIMATION ===== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] > div {
+    animation: fadeIn 0.4s ease-out both;
+}
