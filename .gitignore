@@ -12,3 +12,12 @@ mlruns/
 .idea/
 .vscode/
 .claude/
+.streamlit/
+data/*.db
+data/chroma_db/
+
+# Next.js web app
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local

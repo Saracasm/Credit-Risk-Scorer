@@ -1,6 +1,6 @@
 # Credit Risk Scorer
 
-End-to-end classical ML system: loan default probability (Give Me Some Credit), SHAP explanations, Fairlearn age-group audit, Streamlit UI, Docker for Hugging Face Spaces.
+End-to-end classical ML system: loan default probability (Give Me Some Credit), SHAP explanations, Fairlearn age-group audit, **Streamlit** or **Next.js + FastAPI** UI. Deploy on **[Railway](docs/railway.md)** (recommended) or any host that can run Python and Node.
 
 ## Tech stack
 
@@ -8,8 +8,8 @@ End-to-end classical ML system: loan default probability (Give Me Some Credit), 
 - **ML:** scikit-learn, XGBoost, imbalanced-learn (SMOTE), Optuna  
 - **Explainability / fairness:** SHAP, Fairlearn  
 - **Tracking (optional):** MLflow (`requirements-mlflow.txt`)  
-- **App:** Streamlit  
-- **Deploy:** Docker (Python 3.11-slim), port **7860**
+- **App:** Streamlit and/or **Next.js** (`frontend/`) + **FastAPI** (`backend/`)  
+- **Deploy:** [Railway (two services)](docs/railway.md)
 
 ## Dataset
 
@@ -57,18 +57,6 @@ Place **`cs-training.csv`** in `data/` (do not commit; it is gitignored).
    ```bash
    pytest tests/ -v
    ```
-
-## Docker
-
-Build and run (from project root; **`models/xgb_pipeline.pkl` must exist** in the build context):
-
-```bash
-docker build -t credit-risk-scorer .
-docker run -p 7860:7860 credit-risk-scorer
-```
-
-Open `http://localhost:7860`.
-
 
 ## Model card
 

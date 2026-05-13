@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CREDIT RISK SCORER - Professional Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#292931",
+                        "on-secondary-fixed-variant": "#5c3187",
+                        "on-surface-variant": "#c5c5d5",
+                        "surface-bright": "#383940",
+                        "outline-variant": "#444653",
+                        "primary": "#b9c3ff",
+                        "tertiary-container": "#ca8012",
+                        "on-primary-container": "#001e78",
+                        "surface-tint": "#b9c3ff",
+                        "on-primary-fixed-variant": "#1f3ba6",
+                        "surface-container-low": "#1a1b22",
+                        "surface-container": "#1e1f26",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-highest": "#34343c",
+                        "primary-fixed": "#dde1ff",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#472a00",
+                        "on-secondary": "#44176f",
+                        "surface-variant": "#34343c",
+                        "surface": "#121319",
+                        "tertiary-fixed-dim": "#ffb964",
+                        "on-tertiary-fixed": "#2b1700",
+                        "on-primary": "#002388",
+                        "on-tertiary-fixed-variant": "#663e00",
+                        "surface-container-lowest": "#0d0e14",
+                        "on-tertiary-container": "#3e2400",
+                        "primary-fixed-dim": "#b9c3ff",
+                        "surface-dim": "#121319",
+                        "inverse-primary": "#3c55bf",
+                        "inverse-on-surface": "#2f3037",
+                        "secondary-fixed": "#f0dbff",
+                        "primary-container": "#7189f6",
+                        "on-error": "#690005",
+                        "outline": "#8f909e",
+                        "on-surface": "#e3e1eb",
+                        "on-secondary-fixed": "#2c0051",
+                        "background": "#121319",
+                        "on-secondary-container": "#d0a1ff",
+                        "secondary": "#dcb8ff",
+                        "on-primary-fixed": "#001356",
+                        "tertiary-fixed": "#ffddb9",
+                        "error-container": "#93000a",
+                        "tertiary": "#ffb964",
+                        "on-background": "#e3e1eb",
+                        "inverse-surface": "#e3e1eb",
+                        "secondary-container": "#5c3187",
+                        "secondary-fixed-dim": "#dcb8ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "gutter": "20px",
+                        "xl": "40px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "container_max": "1440px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-caps": ["Inter"],
+                        "data-point": ["JetBrains Mono"],
+                        "body-main": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "data-point": ["14px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "body-main": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f0f23;
+            color: #e3e1eb;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .risk-gauge-outer {
+            background: conic-gradient(#10b981 15%, transparent 15% 100%);
+        }
+    </style>
+</head>
+<body class="font-body-main text-body-main selection:bg-primary/30">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-container/30 backdrop-blur-md border-b border-white/10 shadow-sm">
+<div class="flex justify-between items-center px-gutter h-16 w-full max-w-container_max mx-auto">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-headline-md" style="font-variation-settings: 'FILL' 1;">credit_card</span>
+<span class="font-display-lg text-headline-md tracking-tighter text-primary">CREDIT RISK SCORER</span>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2 font-label-caps" href="#">Risk Scorer</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2 font-label-caps" href="#">AI Advisor</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2 font-label-caps" href="#">Scenarios</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2 font-label-caps" href="#">Batch Scoring</a>
+<a class="text-primary border-b-2 border-primary font-bold pb-2 font-label-caps" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-2 font-label-caps" href="#">Report</a>
+</nav>
+<div class="flex items-center gap-md">
+<div class="relative group cursor-pointer">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-surface-container-highest">
+<img alt="Analyst Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a financial analyst in a modern office environment. The person is wearing a sleek dark suit, looking towards the camera with a confident and intelligent expression. The background is a slightly blurred high-tech trading floor with cool blue ambient lighting, reinforcing the professional fintech aesthetic of the dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq7jt7oAcz9Ke5wdKa_F4uM5o7GcEkuenI0oWlRCZwKzybJQ5u3Z4Tud45w80VKgtyuKGSg7qjEpeFtXP_RvhRg7roF8TvCfkYF6lyPXNegoVi-3OWgfj-maW5xAWb9DmvPpiicetyAfddoughCQB5TNeMJq5h1O6qgA1KGbFmaIi4Mo0HeVXWGRMgOXlRSggF5tPGzDqPS63_sYdbd76iGauWAYCUQNHXSh8pM1S2YoVXw46UyH1fg79b-WRoHz55KQRn68em"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-12 px-gutter max-w-container_max mx-auto flex flex-col md:flex-row gap-lg">
+<!-- Left Column: Main Dashboard Content -->
+<div class="flex-grow space-y-lg">
+<!-- Hero Risk Gauge Section -->
+<section class="glass-card p-xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<div class="relative w-64 h-64 flex items-center justify-center rounded-full border-8 border-white/5 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+<div class="absolute inset-0 rounded-full risk-gauge-outer opacity-80 rotate-180"></div>
+<div class="z-10 flex flex-col items-center">
+<span class="font-data-point text-display-lg text-white">15%</span>
+<span class="font-label-caps text-on-surface-variant tracking-[0.2em]">DEFAULT RISK</span>
+</div>
+</div>
+<div class="mt-lg flex flex-col items-center gap-sm">
+<div class="bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-emerald-400 text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-caps text-emerald-400">LOW RISK</span>
+</div>
+<p class="text-on-surface-variant max-w-md font-body-main mt-xs">
+                        Profile exhibits strong repayment patterns and low credit utilization relative to peer benchmarks.
+                    </p>
+</div>
+</section>
+<!-- Metric Cards (3 Columns) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Monthly Income -->
+<div class="glass-card p-lg flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-on-surface-variant">MONTHLY INCOME</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">payments</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-data-point text-headline-md text-white">$5,000</span>
+<span class="text-xs text-emerald-400 font-data-point">+2.4%</span>
+</div>
+<div class="h-10 mt-xs">
+<svg class="w-full h-full" viewbox="0 0 200 40">
+<path d="M0 30 Q 25 10, 50 25 T 100 20 T 150 35 T 200 10" fill="none" stroke="url(#primaryGradient)" stroke-width="2"></path>
+<defs>
+<lineargradient id="primaryGradient" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#667eea"></stop>
+<stop offset="100%" stop-color="#764ba2"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+</div>
+<!-- Debt-to-Income -->
+<div class="glass-card p-lg flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-on-surface-variant">DEBT-TO-INCOME</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">balance</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-data-point text-headline-md text-white">0.30</span>
+<span class="text-xs text-emerald-400 font-data-point">OPTIMAL</span>
+</div>
+<div class="w-full h-1.5 bg-white/5 rounded-full mt-base overflow-hidden">
+<div class="h-full bg-emerald-500 w-[30%]"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-label-caps">TARGET: &lt; 0.36</span>
+</div>
+<!-- Credit Usage -->
+<div class="glass-card p-lg flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-on-surface-variant">CREDIT USAGE</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">speed</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative w-12 h-12">
+<svg class="w-12 h-12 -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"></path>
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#b9c3ff" stroke-dasharray="20, 100" stroke-width="3"></path>
+</svg>
+</div>
+<div>
+<span class="font-data-point text-headline-md text-white">20%</span>
+<p class="text-[10px] text-on-surface-variant font-label-caps">HEALTHY LIMIT</p>
+</div>
+</div>
+</div>
+</div>
+<!-- SHAP Factors Horizontal Bar Chart -->
+<section class="glass-card p-lg">
+<div class="flex justify-between items-center mb-lg">
+<h2 class="font-headline-md text-white">Key Risk Factors</h2>
+<span class="font-label-caps text-on-surface-variant">MODEL: XGBOOST-V4</span>
+</div>
+<div class="space-y-md">
+<!-- Factor Row: Age -->
+<div class="grid grid-cols-[120px_1fr_120px] items-center gap-md">
+<span class="font-label-caps text-on-surface-variant text-right">Age</span>
+<div class="flex items-center justify-center h-4 relative">
+<div class="absolute w-px h-full bg-white/20 left-1/2"></div>
+<div class="bg-emerald-500/60 h-2 w-1/4 absolute right-1/2 rounded-l-sm"></div>
+</div>
+<span class="font-data-point text-emerald-400 text-xs">-0.24 (Positive)</span>
+</div>
+<!-- Factor Row: Monthly Income -->
+<div class="grid grid-cols-[120px_1fr_120px] items-center gap-md">
+<span class="font-label-caps text-on-surface-variant text-right">Monthly Income</span>
+<div class="flex items-center justify-center h-4 relative">
+<div class="absolute w-px h-full bg-white/20 left-1/2"></div>
+<div class="bg-emerald-500/60 h-2 w-1/3 absolute right-1/2 rounded-l-sm"></div>
+</div>
+<span class="font-data-point text-emerald-400 text-xs">-0.35 (Positive)</span>
+</div>
+<!-- Factor Row: Debt Ratio -->
+<div class="grid grid-cols-[120px_1fr_120px] items-center gap-md">
+<span class="font-label-caps text-on-surface-variant text-right">Debt Ratio</span>
+<div class="flex items-center justify-center h-4 relative">
+<div class="absolute w-px h-full bg-white/20 left-1/2"></div>
+<div class="bg-error/60 h-2 w-1/6 absolute left-1/2 rounded-r-sm"></div>
+</div>
+<span class="font-data-point text-error text-xs">+0.12 (Risk)</span>
+</div>
+<!-- Factor Row: Credit Utilization -->
+<div class="grid grid-cols-[120px_1fr_120px] items-center gap-md">
+<span class="font-label-caps text-on-surface-variant text-right">Credit Utilization</span>
+<div class="flex items-center justify-center h-4 relative">
+<div class="absolute w-px h-full bg-white/20 left-1/2"></div>
+<div class="bg-emerald-500/60 h-2 w-1/5 absolute right-1/2 rounded-l-sm"></div>
+</div>
+<span class="font-data-point text-emerald-400 text-xs">-0.18 (Positive)</span>
+</div>
+<!-- Factor Row: Late Payments -->
+<div class="grid grid-cols-[120px_1fr_120px] items-center gap-md">
+<span class="font-label-caps text-on-surface-variant text-right">Late Payments</span>
+<div class="flex items-center justify-center h-4 relative">
+<div class="absolute w-px h-full bg-white/20 left-1/2"></div>
+<div class="bg-error/60 h-2 w-1/2 absolute left-1/2 rounded-r-sm"></div>
+</div>
+<span class="font-data-point text-error text-xs">+0.48 (High Risk)</span>
+</div>
+</div>
+</section>
+</div>
+<!-- SideNavBar (Right): Quick Actions -->
+<aside class="w-full md:w-80 flex flex-col gap-lg">
+<div class="glass-card p-lg flex flex-col gap-md sticky top-24">
+<div class="flex items-center justify-between mb-xs">
+<div>
+<h3 class="font-label-caps text-primary tracking-widest">QUICK ACTIONS</h3>
+<p class="text-[10px] text-on-surface-variant font-label-caps">INSTITUTIONAL GRADE</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">bolt</span>
+</div>
+<button class="primary-gradient w-full flex items-center justify-between px-md py-3 rounded-lg text-white font-label-caps hover:brightness-110 active:scale-[0.98] transition-all">
+<span class="flex items-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+                        Ask AI Advisor
+                    </span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+<button class="bg-white/5 border border-white/10 w-full flex items-center justify-between px-md py-3 rounded-lg text-white font-label-caps hover:bg-white/10 active:scale-[0.98] transition-all">
+<span class="flex items-center gap-sm">
+<span class="material-symbols-outlined">compare_arrows</span>
+                        Run What-If
+                    </span>
+</button>
+<button class="bg-white/5 border border-white/10 w-full flex items-center justify-between px-md py-3 rounded-lg text-white font-label-caps hover:bg-white/10 active:scale-[0.98] transition-all">
+<span class="flex items-center gap-sm">
+<span class="material-symbols-outlined">description</span>
+                        Generate Report
+                    </span>
+</button>
+<button class="bg-white/5 border border-white/10 w-full flex items-center justify-between px-md py-3 rounded-lg text-white font-label-caps hover:bg-white/10 active:scale-[0.98] transition-all">
+<span class="flex items-center gap-sm">
+<span class="material-symbols-outlined">trending_up</span>
+                        Improve Score
+                    </span>
+</button>
+<div class="mt-md pt-md border-t border-white/5">
+<div class="flex items-center gap-sm mb-xs">
+<span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">SYSTEM STATUS: NOMINAL</span>
+</div>
+<p class="text-xs text-on-surface-variant/60 leading-relaxed">
+                        Risk data synced with global databases 2 minutes ago. Model confidence: 98.2%.
+                    </p>
+</div>
+</div>
+<!-- Ad-hoc Export/Tools Card -->
+<div class="glass-card p-lg flex flex-col gap-sm">
+<span class="font-label-caps text-on-surface-variant">EXPORT DATA</span>
+<div class="grid grid-cols-2 gap-sm">
+<button class="bg-surface-container-highest p-3 rounded flex flex-col items-center gap-xs hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-primary">download</span>
+<span class="text-[10px] font-label-caps">CSV</span>
+</button>
+<button class="bg-surface-container-highest p-3 rounded flex flex-col items-center gap-xs hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+<span class="text-[10px] font-label-caps">PDF</span>
+</button>
+</div>
+</div>
+</aside>
+</main>
+<!-- Background Decoration -->
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full -z-10"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary-container/10 blur-[120px] rounded-full -z-10"></div>
+</body></html>
