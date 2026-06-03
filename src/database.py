@@ -1,23 +1,18 @@
 """
 Database layer for credit risk scorer.
 
-Uses SQLite for structured prediction history and applicant records.
-Optionally uses ChromaDB for semantic similarity search across applicants.
+Uses SQLite for structured prediction history, applicant records, and AI
+advisor conversation history.
 
 SQLite tables:
   - predictions: all scored applicants with timestamps and results
   - conversations: agent chat history per session
-
-ChromaDB collection (optional):
-  - applicant_profiles: vectorized applicant descriptions for similarity search
 """
 from __future__ import annotations
 
-import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -181,127 +176,3 @@ def get_conversation(session_id: str) -> list[dict]:
         return [dict(r) for r in rows]
     finally:
         conn.close()
-
-
-# ---------------------------------------------------------------------------
-# Similar applicant search (ChromaDB — optional)
-# ---------------------------------------------------------------------------
-
-_chroma_collection = None
-
-
-def _get_chroma_collection():
-    """Lazily initialize a ChromaDB collection for applicant similarity search."""
-    global _chroma_collection
-    if _chroma_collection is not None:
-        return _chroma_collection
-
-    try:
-        import chromadb
-    except ImportError:
-        return None
-
-    chroma_dir = PROJECT_ROOT / "data" / "chroma_db"
-    chroma_dir.mkdir(parents=True, exist_ok=True)
-    client = chromadb.PersistentClient(path=str(chroma_dir))
-    _chroma_collection = client.get_or_create_collection(
-        name="applicant_profiles",
-        metadata={"description": "Vectorized applicant profiles for similarity search"},
-    )
-    return _chroma_collection
-
-
-def _applicant_to_text(applicant: dict, probability: float) -> str:
-    """Convert applicant dict to a natural language description for embedding."""
-    return (
-        f"Loan applicant age {applicant.get('age', 'unknown')}, "
-        f"monthly income ${applicant.get('monthly_income', 0):,.0f}, "
-        f"debt-to-income ratio {applicant.get('debt_ratio', 0):.2f}, "
-        f"credit utilization {applicant.get('revolving_util', 0):.0%}, "
-        f"late payments: {applicant.get('n_30_59_late', 0):.0f} (30-59d), "
-        f"{applicant.get('n_60_89_late', 0):.0f} (60-89d), "
-        f"{applicant.get('n_90_late', 0):.0f} (90+d), "
-        f"open credit lines {applicant.get('n_open_lines', 0):.0f}, "
-        f"real estate loans {applicant.get('n_real_estate', 0):.0f}, "
-        f"dependents {applicant.get('n_dependents', 0):.0f}. "
-        f"Default probability: {probability:.1%}."
-    )
-
-
-def index_applicant(applicant: dict, probability: float, pred_id: int) -> bool:
-    """Add an applicant profile to the vector store for similarity search.
-
-    Args:
-        applicant: Applicant parameters dict.
-        probability: Predicted default probability.
-        pred_id: Prediction row ID from SQLite.
-
-    Returns:
-        True if indexed successfully, False if ChromaDB not available.
-    """
-    collection = _get_chroma_collection()
-    if collection is None:
-        return False
-
-    text = _applicant_to_text(applicant, probability)
-    metadata = {
-        "probability": probability,
-        "risk_level": "HIGH" if probability > 0.6 else "MEDIUM" if probability > 0.3 else "LOW",
-        "age": float(applicant.get("age", 0)),
-        "monthly_income": float(applicant.get("monthly_income", 0)),
-        "pred_id": pred_id,
-    }
-    collection.add(
-        documents=[text],
-        metadatas=[metadata],
-        ids=[f"pred_{pred_id}"],
-    )
-    return True
-
-
-def find_similar_applicants(applicant: dict, probability: float, n: int = 5) -> list[dict]:
-    """Find similar past applicants using vector similarity.
-
-    Args:
-        applicant: Current applicant parameters.
-        probability: Current prediction probability.
-        n: Number of similar applicants to return.
-
-    Returns:
-        List of dicts with similar applicant info, or empty if ChromaDB unavailable.
-    """
-    collection = _get_chroma_collection()
-    if collection is None:
-        return []
-
-    if collection.count() == 0:
-        return []
-
-    query_text = _applicant_to_text(applicant, probability)
-    results = collection.query(query_texts=[query_text], n_results=min(n, collection.count()))
-
-    similar = []
-    for i, doc in enumerate(results["documents"][0]):
-        meta = results["metadatas"][0][i] if results["metadatas"] else {}
-        dist = results["distances"][0][i] if results["distances"] else None
-        similar.append({
-            "description": doc,
-            "probability": meta.get("probability"),
-            "risk_level": meta.get("risk_level"),
-            "age": meta.get("age"),
-            "monthly_income": meta.get("monthly_income"),
-            "similarity_distance": dist,
-        })
-    return similar
-
-
-def get_chroma_status() -> str:
-    """Check if ChromaDB is available and return status string."""
-    try:
-        import chromadb
-        coll = _get_chroma_collection()
-        if coll is not None:
-            return f"Active ({coll.count()} profiles indexed)"
-        return "Unavailable"
-    except ImportError:
-        return "Not installed (pip install chromadb)"

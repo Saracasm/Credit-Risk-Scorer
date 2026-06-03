@@ -29,7 +29,7 @@ graph TD
 
     subgraph Data ["Data Layer"]
         SQLite[(SQLite DB)]
-        Chroma[(ChromaDB Vector Store)]
+        KB[Policy Knowledge Base RAG]
     end
 
     subgraph ML_System ["ML Engine (Python)"]
@@ -47,16 +47,16 @@ graph TD
     API <-->|Feature Vector| Model
     API <-->|Feature Importance| SHAP
     API <-->|SQL| SQLite
-    API <-->|Embeddings| Chroma
+    LLMProxy <-->|Retrieve policy| KB
     LLMProxy <-->|Prompt + Context| Groq
     API <-->|Route| LLMProxy
 ```
 
 - **Frontend (Presentation Layer):** A modern, highly interactive React Single Page Application built with Next.js and Tailwind CSS. It communicates exclusively via REST to the backend, rendering dynamic charts and a glassmorphic UI.
 - **Backend (API Layer):** A fast, async Python server (FastAPI). It loads the pre-trained XGBoost pipeline (`models/xgb_pipeline.pkl`) into memory and handles inference requests.
-- **Data Layer:** Uses SQLite to store structured prediction history and AI advisor conversation logs. It also utilizes an optional ChromaDB vector store to index applicant profiles, enabling semantic similarity search (finding past applicants with similar risk profiles).
+- **Data Layer:** Uses SQLite to store structured prediction history and AI advisor conversation logs (giving the advisor memory across turns). A retrieval-augmented **policy knowledge base** (markdown docs in `knowledge/`, indexed with TF-IDF) lets the advisor ground its answers in the bank's actual lending policy, eligibility thresholds, products, hardship programs, and fair-lending rules.
 - **ML Engine (Core Logic):** Processes raw inputs through standard scaling, one-hot encoding, and missing value imputation before passing them to the tuned XGBoost classifier. It also calculates local SHAP values to explain exactly *why* a decision was made.
-- **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq ), injecting the applicant's risk profile and SHAP values into a structured prompt to generate personalized, natural language financial advice.
+- **External AI Advisor:** The backend proxy orchestrates requests to external LLM providers (like Groq), injecting the applicant's risk profile and SHAP values into a structured prompt, calling model-backed tools (risk scoring, improvement projections), and retrieving relevant bank policy from the knowledge base to generate personalized, grounded natural-language advice.
 
 ## Dataset
 

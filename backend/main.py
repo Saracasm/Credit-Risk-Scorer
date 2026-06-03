@@ -267,9 +267,8 @@ def predict(body: ApplicantInput):
 
     # Persist to SQLite
     try:
-        from src.database import save_prediction, index_applicant
-        pred_id = save_prediction(body.model_dump(), prob, cls)
-        index_applicant(body.model_dump(), prob, pred_id)
+        from src.database import save_prediction
+        save_prediction(body.model_dump(), prob, cls)
     except Exception:
         pass
 

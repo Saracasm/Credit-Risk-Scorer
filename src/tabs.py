@@ -13,9 +13,9 @@ import streamlit as st
 from pathlib import Path
 from src.inference import build_feature_row, predict_default, shap_values_row
 from src.database import (
-    save_prediction, index_applicant, find_similar_applicants,
-    get_all_predictions, get_prediction_stats, save_message, get_chroma_status,
+    save_prediction, get_all_predictions, get_prediction_stats, save_message,
 )
+from src.knowledge import knowledge_status
 from src.monitor import log_prediction, check_and_alert
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -220,8 +220,7 @@ def _execute_scorer_analysis(pipe, params: dict) -> None:
     X = build_feature_row(**params)
     prob, cls = predict_default(pipe, X)
 
-    pred_id = save_prediction(params, prob, cls)
-    index_applicant(params, prob, pred_id)
+    save_prediction(params, prob, cls)
 
     log_prediction(
         {
@@ -774,9 +773,9 @@ def render_dashboard_tab(pipe):
                     if c in preds.columns]
     st.dataframe(preds[display_cols].head(20), use_container_width=True)
 
-    # Vector DB status
+    # Policy knowledge base status
     st.markdown("---")
-    st.caption(f"Vector DB (ChromaDB): {get_chroma_status()}")
+    st.caption(f"Policy knowledge base (RAG): {knowledge_status()}")
 
 
 def render_report_tab(pipe):

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardData, getDashboard } from "@/lib/api";
+import { DashboardData, KnowledgeInfo, getDashboard, getKnowledge } from "@/lib/api";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell, ResponsiveContainer,
@@ -16,12 +16,14 @@ const PIE_COLORS: Record<string, string> = {
 export default function DashboardTab() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [kb, setKb] = useState<KnowledgeInfo | null>(null);
 
   useEffect(() => {
     getDashboard()
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
+    getKnowledge().then(setKb).catch(() => setKb(null));
   }, []);
 
   if (loading) {
@@ -63,12 +65,25 @@ export default function DashboardTab() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="glass-elevated p-6">
-        <h2 className="font-display text-lg font-semibold text-white mb-1">
-          📊 Portfolio Risk Dashboard
-        </h2>
-        <p className="text-sm text-on-muted">
-          Aggregate analytics across all scored applicants.
-        </p>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-white mb-1">
+              📊 Portfolio Risk Dashboard
+            </h2>
+            <p className="text-sm text-on-muted">
+              Aggregate analytics across all scored applicants.
+            </p>
+          </div>
+          {kb?.available && (
+            <span
+              title={`Advisor policy knowledge base: ${kb.docs.join(", ")}`}
+              className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full whitespace-nowrap"
+              style={{ color: "#00f2fe", background: "rgba(0,242,254,0.08)", border: "1px solid rgba(0,242,254,0.2)" }}
+            >
+              📚 Policy RAG · {kb.doc_count} docs · {kb.chunk_count} sections
+            </span>
+          )}
+        </div>
       </div>
 
       {/* KPI cards */}
