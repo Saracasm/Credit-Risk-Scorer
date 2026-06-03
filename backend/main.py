@@ -36,6 +36,15 @@ _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+# Load environment variables from a .env file at the repo root (e.g.
+# GROQ_API_KEY for the free tier) regardless of how the server is launched.
+# This must run before any os.environ reads below.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(_ROOT / ".env")
+except Exception:
+    pass
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
