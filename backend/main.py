@@ -418,22 +418,30 @@ def dashboard():
 
 @app.post("/api/advisor", response_model=AdvisorResponse)
 def advisor(body: AdvisorRequest):
-    """Send a message to the AI credit advisor. Uses Gemini or OpenAI.
+    """AI credit advisor.
 
-    Includes automatic retry with exponential backoff for rate-limit (429)
-    errors so free-tier Gemini usage stays smooth.
+    Two-tier key strategy:
+    - Free tier  (no api_key in request): uses the server's GROQ_API_KEY env var.
+    - Pro tier   (api_key in request):    uses the caller's own key, which is
+                                          forwarded directly to the provider and
+                                          is never written to disk or logged.
     """
+    # Resolve which key to use — server env for free tier, caller-supplied for pro.
     api_key = body.api_key
     if not api_key:
-        if body.provider == "gemini":
-            api_key = os.environ.get("GEMINI_API_KEY", "")
-        elif body.provider == "groq":
+        if body.provider == "groq":
             api_key = os.environ.get("GROQ_API_KEY", "")
+        elif body.provider == "gemini":
+            api_key = os.environ.get("GEMINI_API_KEY", "")
         elif body.provider == "openrouter":
             api_key = os.environ.get("OPENROUTER_API_KEY", "")
 
     if not api_key:
-        raise HTTPException(400, f"No API key provided for {body.provider}. Please set {body.provider.upper()}_API_KEY in backend .env or provide it in the request.")
+        raise HTTPException(
+            400,
+            "Free tier is not configured on this server (missing GROQ_API_KEY). "
+            "Switch to the Pro tier and use your own API key.",
+        )
 
     from src.agent import create_chat_session
     applicant_dict = body.applicant.model_dump() if body.applicant else None
@@ -480,20 +488,26 @@ def advisor(body: AdvisorRequest):
             reply = response.text
             break  # success
         except Exception as e:
+            # Scrub any user-supplied key from error messages so it never
+            # surfaces in logs or API responses.
             err = str(e)
+            if body.api_key:
+                err = err.replace(body.api_key, "***")
             is_rate_limit = (
                 "429" in err
                 or "quota" in err.lower()
                 or "rate" in err.lower()
                 or "resource" in err.lower()
             )
+            is_auth = "401" in err or "invalid_api_key" in err.lower() or "incorrect api key" in err.lower()
             if is_rate_limit and attempt < MAX_RETRIES:
                 wait = BASE_DELAY * (2 ** attempt)  # 2s, 4s, 8s
                 time.sleep(wait)
                 continue
-            # Final attempt or non-rate-limit error
             if is_rate_limit:
                 reply = "⚠️ Rate limit reached after retries. Please wait ~60s and try again."
+            elif is_auth:
+                reply = "❌ Invalid API key. Please check your key and try again."
             else:
                 reply = f"❌ Error: {err[:300]}"
             break
