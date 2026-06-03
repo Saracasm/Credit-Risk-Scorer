@@ -212,6 +212,7 @@ class AdvisorRequest(BaseModel):
     provider: str = "gemini"
     model_name: str = "gemini-2.0-flash"
     api_key: str | None = None  # pro tier; free tier uses env
+    session_id: str | None = None  # carries conversation memory across turns
 
 
 class AdvisorResponse(BaseModel):
@@ -443,6 +444,17 @@ def advisor(body: AdvisorRequest):
             "n_dependents": applicant_dict["n_dependents"],
         }
 
+    # --- Conversation memory -------------------------------------------------
+    # Reuse the caller's session_id (or mint a new one) and replay prior turns so
+    # follow-up questions like "tell me more about that second factor" work.
+    session_id = body.session_id or str(uuid.uuid4())
+    history: list[dict] = []
+    try:
+        from src.database import get_conversation
+        history = get_conversation(session_id)[-20:]  # cap to recent turns
+    except Exception:
+        history = []
+
     MAX_RETRIES = 3
     BASE_DELAY = 2  # seconds; delays will be 2, 4, 8
 
@@ -453,6 +465,7 @@ def advisor(body: AdvisorRequest):
                 api_key=api_key,
                 model_name=body.model_name,
                 applicant=applicant_dict,
+                history=history,
             )
             response = session.send_message(body.message)
             reply = response.text
@@ -476,7 +489,15 @@ def advisor(body: AdvisorRequest):
                 reply = f"❌ Error: {err[:300]}"
             break
 
-    return AdvisorResponse(reply=reply, session_id=str(uuid.uuid4()))
+    # Persist this turn so the next request can recall it.
+    try:
+        from src.database import save_message
+        save_message(session_id, "user", body.message)
+        save_message(session_id, "assistant", reply)
+    except Exception:
+        pass
+
+    return AdvisorResponse(reply=reply, session_id=session_id)
 
 
 # ---------------------------------------------------------------------------

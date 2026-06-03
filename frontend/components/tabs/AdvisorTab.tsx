@@ -24,6 +24,7 @@ export default function AdvisorTab({ applicant }: { applicant: ApplicantInput })
   const [loading, setLoading] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState(MODELS[0].id);
   const [apiKey, setApiKey] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,12 +41,14 @@ export default function AdvisorTab({ applicant }: { applicant: ApplicantInput })
     try {
       const selectedModel = MODELS.find((m) => m.id === selectedModelId) || MODELS[0];
       const res = await askAdvisor(
-        text, 
-        applicant, 
-        selectedModel.provider, 
-        selectedModel.model, 
-        apiKey
+        text,
+        applicant,
+        selectedModel.provider,
+        selectedModel.model,
+        apiKey,
+        sessionId,
       );
+      setSessionId(res.session_id);
       setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
     } catch (e) {
       setMessages((prev) => [

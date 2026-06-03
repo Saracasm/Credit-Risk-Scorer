@@ -156,6 +156,7 @@ export async function askAdvisor(
   provider: string = "gemini",
   model_name: string = "gemini-2.0-flash",
   apiKey?: string,
+  sessionId?: string | null,
 ): Promise<AdvisorResponse> {
   return post<AdvisorResponse>("/api/advisor", {
     message,
@@ -163,6 +164,7 @@ export async function askAdvisor(
     provider,
     model_name,
     api_key: apiKey || undefined,
+    session_id: sessionId || undefined,
   });
 }
 

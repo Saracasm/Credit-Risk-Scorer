@@ -61,9 +61,13 @@ Your tools (always call them — do not invent numbers):
 1. predict_risk          — score an applicant; returns default probability, risk
                             level, and the top SHAP factors driving the score.
 2. find_improvements     — test realistic changes and return the actions that
-                            most reduce the applicant's risk.
+                            most reduce the applicant's risk, PLUS a
+                            `combined_improvement` showing the payoff of doing the
+                            top fixes together.
 3. run_what_if           — compare an original vs a modified profile side by side.
 4. get_loan_recommendation — suggest a decision, rate tier, and conditions.
+5. lookup_policy         — retrieve the bank's actual written policy (eligibility
+                            thresholds, tiers, conditions, fair-lending rules).
 
 ═══ HOW TO HANDLE THE TWO KEY QUESTIONS ═══
 
@@ -82,8 +86,17 @@ Your tools (always call them — do not invent numbers):
   2. Turn the results into a short, prioritized action plan — most impactful first.
   3. For each action, give the concrete target AND the expected risk drop, e.g.
      "Bring utilization from 82% down to 30% → your risk falls by about 14%."
-  4. Keep advice realistic (you can't change someone's age); focus on what they
+  4. ALWAYS share the `combined_improvement` headline — doing the top fixes
+     together is far more motivating than any single step (e.g. "Do all three and
+     your risk drops from 97% to 18%"). Individual steps alone can look small.
+  5. Keep advice realistic (you can't change someone's age); focus on what they
      can actually act on: utilization, late payments, debt-to-income, income.
+
+▸ Eligibility / "would I qualify?" / loan terms / "why was I declined?"
+  Call lookup_policy first and quote the bank's real thresholds and conditions
+  (e.g. "Our policy requires utilization at or below 30% for Near-Prime"). When
+  explaining an adverse outcome, give the specific principal reasons from the
+  model's top factors — never vague language, never a protected characteristic.
 
 ═══ TONE & RULES ═══
 - Talk like a helpful human advisor, not a report. Warm, clear, encouraging.
@@ -218,7 +231,33 @@ def find_improvements(
                     "new_probability_percent": f"{new_prob:.1%}",
                 })
     improvements.sort(key=lambda x: float(x["risk_reduction_percent"].rstrip("%")), reverse=True)
-    return {"current_probability_percent": f"{base_prob:.1%}", "top_improvements": improvements[:5]}
+
+    # Combined projection: applying the single best change per parameter together.
+    # For already-high-risk applicants, individual changes barely move the score,
+    # so this shows the realistic, motivating payoff of fixing the top issues at once.
+    best_per_param: dict[str, float] = {}
+    actions_combined: list[str] = []
+    for imp in improvements:  # sorted by reduction desc -> first seen per param is best
+        if imp["parameter"] not in best_per_param:
+            best_per_param[imp["parameter"]] = imp["to_value"]
+            actions_combined.append(imp["action"])
+    combined = None
+    if best_per_param:
+        mod = bp.copy()
+        for param, tv in best_per_param.items():
+            mod[param] = float(tv)
+        comb_prob, _ = predict_default(pipe, build_feature_row(**mod))
+        combined = {
+            "actions": actions_combined,
+            "new_probability_percent": f"{comb_prob:.1%}",
+            "total_risk_reduction_percent": f"{base_prob - comb_prob:.1%}",
+        }
+
+    return {
+        "current_probability_percent": f"{base_prob:.1%}",
+        "top_improvements": improvements[:5],
+        "combined_improvement": combined,
+    }
 
 
 def get_loan_recommendation(
@@ -255,8 +294,25 @@ def get_loan_recommendation(
                 "conditions": ["Co-signer required", "Collateral required", "Consider declining"], **result}
 
 
+def lookup_policy(query: str) -> dict:
+    """Look up the bank's written lending policy, eligibility thresholds, credit
+    improvement guidance, or fair-lending rules relevant to a question. Use this
+    before stating eligibility criteria, tier thresholds, required conditions, or
+    adverse-action reasons so the answer cites the bank's actual policy rather
+    than general knowledge. Returns matching policy excerpts to quote."""
+    from src.knowledge import retrieve_policy
+    chunks = retrieve_policy(query, n=3)
+    if not chunks:
+        return {"results": [], "note": "No policy documents matched this query."}
+    return {
+        "results": [
+            {"source": c["source"], "excerpt": c["text"]} for c in chunks
+        ]
+    }
+
+
 # All tools
-AGENT_TOOLS = [predict_risk, run_what_if, find_improvements, get_loan_recommendation]
+AGENT_TOOLS = [predict_risk, run_what_if, find_improvements, get_loan_recommendation, lookup_policy]
 
 # Tool name -> function mapping
 TOOL_MAP = {fn.__name__: fn for fn in AGENT_TOOLS}
@@ -298,6 +354,12 @@ OPENAI_TOOLS = [
         "parameters": {"type": "object",
                         "properties": {**_ORIG_PROPS, **_MOD_PROPS},
                         "required": list(_ORIG_PROPS) + list(_MOD_PROPS)}}},
+    {"type": "function", "function": {
+        "name": "lookup_policy", "description": lookup_policy.__doc__,
+        "parameters": {"type": "object",
+                        "properties": {"query": {"type": "string",
+                            "description": "What policy/eligibility/improvement topic to look up"}},
+                        "required": ["query"]}}},
 ]
 
 
@@ -329,8 +391,10 @@ Use these as baseline when calling tools. When user says "this applicant", use t
 # Provider: Gemini
 # ---------------------------------------------------------------------------
 
-def create_gemini_session(api_key: str, applicant: dict | None = None, model_name: str = "gemini-2.0-flash"):
-    """Create a Gemini chat session with function calling."""
+def create_gemini_session(api_key: str, applicant: dict | None = None,
+                          model_name: str = "gemini-2.0-flash",
+                          history: list[dict] | None = None):
+    """Create a Gemini chat session with function calling and prior history."""
     import google.generativeai as genai
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(
@@ -338,7 +402,12 @@ def create_gemini_session(api_key: str, applicant: dict | None = None, model_nam
         tools=AGENT_TOOLS,
         system_instruction=build_context_prompt(applicant),
     )
-    return model.start_chat(enable_automatic_function_calling=True)
+    gem_history = [
+        {"role": "model" if h["role"] == "assistant" else "user",
+         "parts": [h["content"]]}
+        for h in (history or [])
+    ]
+    return model.start_chat(enable_automatic_function_calling=True, history=gem_history)
 
 
 # ---------------------------------------------------------------------------
@@ -348,10 +417,13 @@ def create_gemini_session(api_key: str, applicant: dict | None = None, model_nam
 class OpenAIChatSession:
     """Wrapper around OpenAI chat completions with function calling."""
 
-    def __init__(self, client, model: str, applicant: dict | None = None):
+    def __init__(self, client, model: str, applicant: dict | None = None,
+                 history: list[dict] | None = None):
         self.client = client
         self.model = model
         self.messages = [{"role": "system", "content": build_context_prompt(applicant)}]
+        for h in (history or []):
+            self.messages.append({"role": h["role"], "content": h["content"]})
 
     def send_message(self, user_message: str):
         """Send message and handle function calling loop."""
@@ -423,7 +495,8 @@ PROVIDER_MODELS = {
 
 
 def create_chat_session(provider: str, api_key: str, model_name: str,
-                        applicant: dict | None = None):
+                        applicant: dict | None = None,
+                        history: list[dict] | None = None):
     """Create a chat session for the given provider.
 
     Args:
@@ -431,6 +504,7 @@ def create_chat_session(provider: str, api_key: str, model_name: str,
         api_key: API key for the provider.
         model_name: Model identifier (e.g. "gemini-2.0-flash", "gpt-4o").
         applicant: Current applicant context.
+        history: Prior turns as [{"role": "user"|"assistant", "content": str}].
 
     Returns:
         Chat session with .send_message(text) -> response with .text
@@ -438,14 +512,14 @@ def create_chat_session(provider: str, api_key: str, model_name: str,
     if provider == "openai":
         from openai import OpenAI
         client = OpenAI(api_key=api_key, timeout=20.0)
-        return OpenAIChatSession(client, model_name, applicant)
+        return OpenAIChatSession(client, model_name, applicant, history)
     elif provider == "openrouter":
         from openai import OpenAI
         client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1", timeout=20.0)
-        return OpenAIChatSession(client, model_name, applicant)
+        return OpenAIChatSession(client, model_name, applicant, history)
     elif provider == "groq":
         from openai import OpenAI
         client = OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1", timeout=20.0)
-        return OpenAIChatSession(client, model_name, applicant)
+        return OpenAIChatSession(client, model_name, applicant, history)
     else:
-        return create_gemini_session(api_key, applicant, model_name)
+        return create_gemini_session(api_key, applicant, model_name, history)
