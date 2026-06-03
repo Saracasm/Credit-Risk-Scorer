@@ -50,7 +50,9 @@ def _build_index():
         return _index
     from sklearn.feature_extraction.text import TfidfVectorizer
 
-    vec = TfidfVectorizer(stop_words="english")
+    # Bigrams + sublinear tf so phrases like "credit utilization" or
+    # "prime subprime" rank by meaning rather than single-word overlap.
+    vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), sublinear_tf=True)
     matrix = vec.fit_transform([c["text"] for c in chunks])
     _index = (vec, matrix, chunks)
     return _index
@@ -87,3 +89,15 @@ def knowledge_status() -> str:
         return "No knowledge base found"
     sources = sorted({c["source"] for c in chunks})
     return f"{len(chunks)} chunks from {len(sources)} docs: {', '.join(sources)}"
+
+
+def knowledge_info() -> dict:
+    """Structured knowledge-base status for the API/UI."""
+    chunks = _load_chunks()
+    sources = sorted({c["source"] for c in chunks})
+    return {
+        "available": bool(chunks),
+        "doc_count": len(sources),
+        "chunk_count": len(chunks),
+        "docs": [s.replace("_", " ") for s in sources],
+    }

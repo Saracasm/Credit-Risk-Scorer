@@ -72,6 +72,13 @@ export type AdvisorResponse = {
   session_id: string;
 };
 
+export type KnowledgeInfo = {
+  available: boolean;
+  doc_count: number;
+  chunk_count: number;
+  docs: string[];
+};
+
 /* ---------- Defaults ---------- */
 
 export const DEFAULT_APPLICANT: ApplicantInput = {
@@ -183,4 +190,8 @@ export async function downloadReport(applicant: ApplicantInput): Promise<Blob> {
 
 export function checkHealth(): Promise<{ ok: boolean; model_loaded: boolean; error?: string }> {
   return get("/health");
+}
+
+export function getKnowledge(): Promise<KnowledgeInfo> {
+  return get<KnowledgeInfo>("/api/knowledge");
 }

@@ -235,6 +235,16 @@ def health():
     return {"ok": True, "model_loaded": _pipe is not None}
 
 
+@app.get("/api/knowledge")
+def knowledge():
+    """Status of the policy RAG knowledge base (for the advisor UI badge)."""
+    try:
+        from src.knowledge import knowledge_info
+        return knowledge_info()
+    except Exception:
+        return {"available": False, "doc_count": 0, "chunk_count": 0, "docs": []}
+
+
 # ---------------------------------------------------------------------------
 # Predict
 # ---------------------------------------------------------------------------
